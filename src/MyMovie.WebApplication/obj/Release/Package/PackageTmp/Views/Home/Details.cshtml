@@ -1,0 +1,260 @@
+﻿
+@{
+    ViewBag.Title = "电影详情";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using MyMovie.Core.Entities;
+<div class="col-sm-12">
+    @{
+        MovieEntity movie = ViewBag.Movie;
+        if (movie != null)
+        {
+            <h2>@movie.Name <span class="text-danger">（@movie.Rate）</span> </h2>
+            <input type="hidden" value="@movie.Id" id="movieId" />
+            <div class="col-sm-2">
+                <img src="~/Images/@movie.PosterURL" class="img-responsive" />
+            </div>
+            <div class="col-sm-8">
+                <p><strong>语言：</strong> @movie.Language</p>
+                <p><strong>时长：</strong> @movie.Duration</p>
+                <p><strong>上映时间：</strong>@movie.ReleaseDate</p>
+                <p><strong>演员：</strong> @movie.Director</p>
+                <p><strong>又名：</strong> @movie.Alias</p>
+            </div>
+
+            <!--影评-->
+            <div class="col-sm-12" style="margin-top:20px">
+                <p>
+                    <a href="javascript:void(0)" onclick="writeSmallComment()"><i class="glyphicon glyphicon-comment"></i>&nbsp;写短评</a> &nbsp;&nbsp;
+                    <a href="javascript:void(0)" onclick="writeFileReview()"><i class="glyphicon glyphicon-pencil"></i>&nbsp;写影评</a>
+                </p>
+                <hr />
+            </div>
+
+
+            <!--简介-->
+            <div class="col-sm-10">
+                <h4 class="text-success">@movie.Name 的简介····</h4>
+                <hr />
+                <p>@movie.Description</p>
+                <hr />
+            </div>
+
+            <!--短评-->
+            <div class="col-sm-10" style="margin-top:10px">
+                <h4 class="text-success">@movie.Name 的短评（共 @ViewBag.CommentCount 条）····</h4>
+                <hr />
+
+                @{
+                    foreach (CommentEntity comment in ViewBag.Comments)
+                    {
+                        <div>
+                            <p><span class="tag"><a href="/user/center/@comment.UserName"> @comment.NickName</a></span>  · @comment.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                            <p>@comment.Conetnt</p>
+                            <hr />
+                        </div>
+                    }
+                }
+
+                <a href="/comment/@movie.Id" class="bg-info">查看短评 @ViewBag.CommentCount 条</a>
+            </div>
+
+            <!--影评-->
+            <div class="col-sm-10" style="margin-top:10px">
+                <h4 class="text-success">@movie.Name 的影评····（共 @ViewBag.ReviewsCount 条）</h4>
+                <hr />
+
+                @{
+                    foreach (ArticleEntity r in ViewBag.Reviews)
+                    {
+                        <div>
+                            <p><span class="tag"><a href="/user/center/@r.UserName">@r.NickName</a> </span>  · @r.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                            <p><a href="/reviews/detail/@r.Id" class="tag">@r.Title</a></p>
+                            <div>
+                                @{
+                                    if (r.Text.Length > 200)
+                                    {
+                                        @r.Text.Substring(0, 200)<span>....(<a href="javascript:void(0)" onclick="showReviews('@r.Content',this,'@r.NickName')" class="tag">展开</a>)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(r.Content)
+                                    }
+                                }
+
+                            </div>
+                            <hr />
+                        </div>
+                    }
+                }
+                <a href="/reviews/@movie.Id" class="bg-info">查看影评 @ViewBag.ReviewsCount 条</a>
+            </div>
+
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <h1>404，未找到你检索的电影 -_-)!</h1>
+            </div>
+        }
+    }
+
+    <!--写短评-->
+    <div class="modal fade" tabindex="-1" role="dialog" id="smallCommentDialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">写短评</h4>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" rows="6" id="smallCommentContent" style="resize:none"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSmallComment()">发布</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--写影评-->
+    <div class="modal fade" tabindex="-1" role="dialog" id="fileReviewDialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">写影评</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" class="form-control" id="title" />
+                    </div>
+                    <div>
+                        <label>内容</label>
+                        <textarea class="form-control" rows="20" id="fileReviewContent"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFileReview()">发布</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+
+@section Scripts{
+    <script src="~/Content/ckeditor/ckeditor.js"></script>
+    <script src="~/Content/ckeditor/config.js"></script>
+    <script src="~/Content/ckeditor/styles.js"></script>
+    <script src="~/Content/ckeditor/zh-cn.js"></script>
+    <script type="text/javascript">
+
+        // 加载ckeditor
+        var editor = CKEDITOR.replace('fileReviewContent');
+
+
+        $(function () {
+
+        });
+
+        /*
+         *
+         * 写短评
+         *
+         */
+        function writeSmallComment() {
+    @{
+        if (Session["User"] == null)
+        {
+            <text> location.href = "/user/login?returnUrl="+location.pathname;</text>
+        }
+        else
+        {
+            <text> $('#smallCommentDialog').modal('show');</text>
+        }
+    }
+    }
+
+         /*
+         *
+         * 写影评
+         *
+         */
+        function writeFileReview() {
+            @{
+                if (Session["User"] == null)
+                {
+                    <text> location.href = "/user/login?returnUrl=" + location.pathname;</text>
+                }
+                else
+                {
+                    <text> $('#fileReviewDialog').modal('show');</text>
+                }
+             }
+        }
+
+
+
+    /*
+    * 保存短评
+    *
+    */
+        function saveSmallComment() {
+            var content = $('#smallCommentContent').val();
+            var movieId = $('#movieId').val();
+            if (content !== '') {
+                $.post({
+                    url: '/comment/add',
+                    data: { 'content': content, 'movieId': movieId },
+                    success: function (data) {
+                        if (data.StatusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert(data.Message);
+                        }
+                    }
+                });
+            }
+        }
+
+
+        /*
+         * 保存影评
+         *
+         */
+        function saveFileReview() {
+            var title = $('#title').val();
+            var content = editor.getData();
+            var text = editor.document.getBody().getText(); // 获取纯文本
+            var movieId = $('#movieId').val();
+            if (title !== '' && content !== '') {
+                $.post({
+                    url: '/reviews',
+                    data: { 'content': content, 'movieId': movieId, 'title': title, 'text': text },
+                    success: function (data) {
+                        if (data.StatusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert(data.Message);
+                        }
+                    }
+                });
+            }
+        }
+
+
+        /*
+         *
+         * 展示全部
+         *
+         */
+        function showReviews(html, e, user) {
+            html += '<p class=\'text-primary\'>&copy;本文版权归作者 ' + user + ' 所有，任何形式转载请联系作者。</p>';
+            $(e).parent().parent().html(html);
+        }
+    </script>
+}
+

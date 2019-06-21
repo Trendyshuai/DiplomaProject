@@ -1,0 +1,23 @@
+﻿@{
+    ArticleEntity article = ViewBag.Review;
+}
+@{
+    ViewBag.Title = article.Title + "- 影评";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using MyMovie.Core.Entities;
+
+<div class="col-sm-12">
+    <h3 style="padding-left:10px">@article.Title</h3>
+    <hr />
+    <p style="padding-left:10px">作者：@article.NickName 日期：@article.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+    <hr />
+    <div class="col-sm-10">
+        @Html.Raw(article.Content)
+    </div>
+
+    <div class="col-sm-10">
+        <p class="text-info">&copy;本文版权归作者 @article.NickName 所有，任何形式转载请联系作者。</p>
+    </div>
+</div>
+

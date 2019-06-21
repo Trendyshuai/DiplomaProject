@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewBag.Title = "登录";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-sm-4 col-sm-offset-4" style="margin-top:60px">
+    <h1 class="text-center" style="padding-bottom:40px">登录，发现更多</h1>
+
+    <form>
+        <div class="form-group">
+            <label for="userName">用户名</label>
+            <input type="text" class="form-control" id="userName" placeholder="用户名">
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" class="form-control" id="password" placeholder="密码">
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" checked="checked"> 记住我
+            </label>
+        </div>
+        <button type="button" class="btn btn-success btn-block" id="login">登录</button>
+    </form>
+</div>
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('#login').click(function () {
+                var userName = $('#userName').val().trim();
+                var password = $('#password').val().trim();
+                if (userName !== '' && password !== '') {
+                    $.post({
+                        url: '/user/access_token',
+                        data: { 'userName': userName, 'password': password },
+                        success: function (data) {
+                            if (data.StatusCode === 200) {
+                                var url = location.search.split('=')[1];
+                                if (url !== undefined && url !== '') {
+                                    location.href = url;
+                                } else {
+                                    location.href = "/";
+                                }
+                            } else {
+                                alert(data.Message);
+                            }
+                        }
+                    });
+                }
+
+            });
+        });
+    </script>
+}
+

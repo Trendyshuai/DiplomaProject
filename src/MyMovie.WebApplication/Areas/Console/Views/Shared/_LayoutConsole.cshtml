@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>电影网站后台管理系统</title>
+
+    <link href="~/Content/easyui-1.5.1/easyui.css" rel="stylesheet" />
+    <link href="~/Content/easyui-1.5.1/icon.css" rel="stylesheet" />
+    <link href="~/Content/console/index.css" rel="stylesheet" />
+    @RenderSection("Styles", false)
+</head>
+<body class="easyui-layout">
+
+    <div data-options="region:'north',split:true" style="height:80px;">
+        <h3>电网站后端管理系统-BETA</h3>
+    </div>
+    <div data-options="region:'south',split:true" style="height:60px;">
+        <p>&copy; @DateTime.Now.Year - Lee · 电影网</p>
+    </div>
+    <div data-options="region:'west',split:true" style="width:10%;">
+        <ul>
+            <li><a href="~/Console/MovieManager">电影管理</a></li>
+            <li><a href="~/Console/CommentManager">短评信息</a></li>
+            <li><a href="~/Console/ReviewManager">影评信息</a></li>
+            <li><a href="~/Console/BaseData">基础数据</a></li>
+            <li><a href="~/Console/OverView/LogOut">退出</a></li>
+        </ul>
+    </div>
+    <!--Content-->
+    <div data-options="region:'center'">
+        @RenderBody()
+    </div>
+
+
+    <!--Dialog-->
+    <div id="dialog" class="easyui-dialog">
+        <iframe id="dialog-from" class="iframe-form" frameborder="0"></iframe>
+    </div>
+
+
+    <!-- Scripts -->
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.easyui.min.js"></script>
+    <script src="~/Scripts/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#dialog').dialog('close');
+        });
+    </script>
+    @RenderSection("Scripts", false)
+
+
+</body>
+</html>

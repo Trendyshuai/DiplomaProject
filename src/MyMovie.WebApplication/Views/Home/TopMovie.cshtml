@@ -1,0 +1,157 @@
+﻿
+@{
+    ViewBag.Title = "电影排行榜";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using MyMovie.Core.Entities;
+<div class="col-sm-10">
+    <h4>
+        <strong>
+            电影排行 共 @ViewBag.Count 部电影
+        </strong>
+    </h4>
+    <hr />
+    <p><a href="javascript:void(0)" id="orderByName">按名称排序</a>&nbsp;&nbsp;/&nbsp;&nbsp;<a href="javascript:void(0)" id="orderByDate">按时间排序</a>&nbsp;&nbsp;/&nbsp;&nbsp;<a href="javascript:void(0)" id="orderByRate">按评分排序</a></p>
+</div>
+<div class="row">
+    <div class="col-sm-10" id="movieList">
+        @{
+            foreach (MovieEntity movie in ViewBag.Movies)
+            {
+                <div class="row" style="margin-top:20px">
+                    <div class="col-sm-2">
+                        <a href="/movie/@movie.Id"><img src="~/Images/@movie.PosterURL" class="img-responsive" style="height:140px" /></a>
+                    </div>
+                    <div class="col-sm-6">
+                        <h5>
+                            <a href="/movie/@movie.Id" class="tag"> <strong>@movie.Name </strong> <span class="text-danger">@movie.Rate</span></a>
+                        </h5>
+                        <p><strong>语言：</strong>@movie.Language</p>
+                        <p><strong>上映时间：</strong>@movie.ReleaseDate</p>
+                        <p><strong>演员：</strong>@movie.Director</p>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!--分页-->
+    <div class="col-sm-4 col-sm-offset-4">
+        <nav aria-label="...">
+            <ul class="pagination">
+                <li>
+                    <input type="hidden" value="@ViewBag.Count" id="count" />
+                    <a href="javascript:void(0)" id="goFristPage"><span aria-hidden="true">&laquo;</span></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" id="goPre">
+                        <span aria-hidden="true">&lsaquo;</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" id="goNext">
+                        <span aria-hidden="true">&rsaquo;</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" aria-label="Next" id="goLastPage">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+
+            var page = 1;
+            var row = 10;
+            var currentPage = 1;
+            var sort = 'R'; // N D R
+
+            // 回首页
+            $('#goFristPage').click(function () {
+                getSortData(1, row, sort);
+            });
+            // 后一页
+            $('#goNext').click(function () {
+                var totalPage = Math.floor(parseInt($('#count').val()) / row);
+                console.log(totalPage);
+                currentPage += 1;
+                if (currentPage > totalPage) {
+                    currentPage = totalPage;
+                }
+                getSortData(currentPage, row, sort);
+                location.href = '#movieList';
+            });
+
+            // 前一页
+            $('#goPre').click(function () {
+                currentPage -= 1;
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+                getSortData( currentPage, row, sort);
+                location.href = '#movieList';
+            });
+            // 最后一页
+            $('#goLastPage').click(function () {
+                var totalPage = Math.floor(parseInt($('#count').val()) / row);
+                getSortData(totalPage, row, sort);
+            });
+
+            // 按名字排序
+            $('#orderByName').click(function () {
+                sort = 'N';
+                getSortData(1, row, sort);
+            });
+
+            // 按时间排序
+            $('#orderByDate').click(function () {
+                sort = 'D';
+                getSortData(1, row, sort);
+            });
+
+            // 按评分排序
+            $('#orderByRate').click(function () {
+                sort = 'R';
+                getSortData(1, row, sort);
+            });
+
+        });
+
+        /*
+       * 筛选数据
+       *
+       */
+        function getSortData(page, row, sort) {
+            $.ajax({
+                url: 'chart?range=' + page + ',' + row + '&sort=' + sort,
+                type: 'get',
+                success: function (data) {
+                    $('#count').val(data.count);
+                    renderHtml(data.rows);
+                }
+            });
+        }
+
+
+        /*
+         * 渲染html
+         */
+        function renderHtml(data) {
+            var html = '';
+            if (data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                    html += '<div class="row" style="margin-top:20px"><div class="col-sm-2"><a href="/movie/' + data[i].Id + '"><img src="../Images/' + data[i].PosterURL + '" class="img-responsive" style="height:140px"/></a></div><div class="col-sm-6"><h5><a href="/movie/' + data[i].Id + '" class="tag"> <strong>' + data[i].Name + ' </strong> <span class="text-danger">' + data[i].Rate + '</span></a></h5><p><strong>语言：</strong>' + data[i].Language + '</p><p><strong>上映时间：</strong>' + data[i].ReleaseDate + '</p><p><strong>演员：</strong>' + data[i].Director + '</p></div></div>';
+                }
+            } else {
+                html = '<h2>暂无数据</h2>';
+            }
+            $('#movieList').html(html);
+        }
+    </script>
+}

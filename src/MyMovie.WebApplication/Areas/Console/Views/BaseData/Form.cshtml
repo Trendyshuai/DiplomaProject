@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewBag.Title = "Form";
+    Layout = "~/Areas/Console/Views/Shared/_LayoutForm.cshtml";
+}
+@using MyMovie.Core.Entities;
+
+@{
+    DictionaryEntity entity = ViewBag.Dic;
+}
+<form method="post" id="form">
+    <table class="table">
+        <tr>
+            <td>
+                <input type="hidden" name="id" value="@(entity==null?0:entity.Id)" />
+                <input type="hidden" name="parId" value="@ViewBag.ParId" />
+
+                <input class="easyui-textbox" type="text" name="text" label="分类名" labelPosition="top" value="@(entity==null?"":entity.Name)" />
+            </td>
+        </tr>
+    </table>
+</form>
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+        });
+
+        function saveData() {
+            $('#form').form({
+                @{
+                    if (ViewBag.Action=="add")
+                    {
+                        <text>url: 'AddDictionaryData',</text>
+                    }
+
+                    if (ViewBag.Action=="update")
+                    {
+                        <text>url: 'UpdateDictionaryData',</text>
+                    }
+                }
+                success: function (data) {
+                    var jData = JSON.parse(data);
+                    if (jData.StatusCode === 200) {
+                        parent.window.reloadData();
+                        parent.window.closeDialog();
+                    } else {
+                        $.messager.alert('系统提示', jData.Message, 'error');
+                    }
+                }
+            }).submit();
+        }
+    </script>
+}

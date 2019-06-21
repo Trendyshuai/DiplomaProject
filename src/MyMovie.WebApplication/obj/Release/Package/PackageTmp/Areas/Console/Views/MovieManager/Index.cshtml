@@ -1,0 +1,200 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Console/Views/Shared/_LayoutConsole.cshtml";
+}
+
+@section Styles{
+    <style type="text/css">
+        .img {
+            width: 40px
+        }
+    </style>
+}
+<div id="dataTable" style="height:100%"></div>
+<!--工具栏-->
+<div id="toolBar" class="toolbar">
+
+    <input class="easyui-textbox" id="keyWord">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doSearch()">查询</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="resetSearch()">重置查询</a>
+
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="openAddDialog()">添加</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateDialog()">修改</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="deleteMovie()">删除</a>
+</div>
+
+
+<div id="buttons" style="display:none">
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true" onclick="saveData()">保存</a>
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true" onclick="closeDialog()">取消</a>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            initPage();
+            initTable('');
+        });
+
+
+        function initPage() {
+            $('#dialog').dialog('close');
+        }
+
+
+        /*
+         * 初始化数据
+         */
+        function initTable(key) {
+            $('#dataTable').datagrid({
+                url: '/MovieManager/GetPageList',
+                method: 'get',
+                title: '电影信息管理',
+                columns: [[
+                    { field: 'Name', title: '电影名称', width: 100 },
+                    { field: 'Director', title: '演员', width: 100, align: 'left' },
+                    { field: 'Language', title: '语言', width: 100, align: 'left' },
+                    { field: 'ReleaseDate', title: '上映时间', width: 100, align: 'left' },
+                    { field: 'Duration', title: '时长', width: 100, align: 'left' },
+                    { field: 'Alias', title: '别名', width: 100, align: 'left' },
+                    { field: 'Description', title: '简介', width: 100, align: 'left' },
+                    { field: 'Rate', title: '评分', width: 100, align: 'left' },
+                    {
+                        field: 'PosterURL', title: '海报', width: 100, align: 'left', formatter: function (value, row, index) {
+                            return '<img src="../Images/' + value + '" class="img" />';
+                        }
+                    },
+                    {
+                        field: 'DelFlag', title: '上架?', width: 100, align: 'left', formatter: function (value, row, index) {
+                            if (value === 1) {
+                                return '上架';
+                            }
+                            if (value === 2) {
+                                return '下架';
+                            }
+                        }
+                    }
+                ]],
+                pageNumber: 1,
+                pageSize: 20,
+                pageList: [20, 50, 100],
+                toolbar: '#toolBar',
+                striped: true,
+                fitColumns: true,
+                pagination: true,
+                pagePosition: 'bottom',
+                showHeader: true,
+                singleSelect: true,
+                queryParams: {
+                    'key': key
+                }
+            });
+        }
+
+
+        /*
+         * 添加
+         */
+        function openAddDialog() {
+            $('#dialog').dialog({
+                title: '新增电影',
+                open: true,
+                modal: true,
+                width: 600,
+                height: 600,
+                top: 200,
+                border: 'thick',
+                buttons: '#buttons'
+            });
+            $('#dialog-from').attr('src', 'Moviemanager/Form?action=add&id=0');
+        }
+
+        /*
+         * 修改
+         */
+        function openUpdateDialog() {
+            var data = $('#dataTable').datagrid('getSelected');
+            if (data) {
+                $('#dialog').dialog({
+                    title: '修改电影',
+                    open: true,
+                    modal: true,
+                    width: 600,
+                    height: 600,
+                    top: 200,
+                    border: 'thick',
+                    buttons: '#buttons'
+                });
+                $('#dialog-from').attr('src', 'moviemanager/Form?action=update&id=' + data.Id);
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        function deleteMovie() {
+            var data = $('#dataTable').datagrid('getSelected');
+            if (data) {
+                $.messager.confirm('确认', '您确认想要删除记录吗？', function (r) {
+                    if (r) {
+                        $.ajax({
+                            url: 'MovieManager/DeleteMovie',
+                            type: 'post',
+                            data: { 'id': data.Id },
+                            success: function (data) {
+                                if (data.StatusCode === 200) {
+                                    reloadData();
+                                } else {
+                                    $.messager.alert('系统提示', data.Message, 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        // 查询
+        function doSearch() {
+            var key = $('#keyWord').textbox('getValue');
+            initTable(key);
+        }
+
+        //重置查询
+        function resetSearch() {
+            initTable('');
+            $('#keyWord').textbox('setValue', '');
+        }
+
+
+
+        /*
+        * 调用子窗体的saveData() 方法
+        */
+        function saveData() {
+            // 获取子窗体
+            var childWindow = $("#dialog-from")[0].contentWindow;
+            childWindow.save();
+        }
+
+        /*
+         * 刷新数据供子窗体调用
+         */
+        function reloadData() {
+            $('#dataTable').datagrid('reload');
+        }
+
+        /*
+         * 关闭Dialog
+         */
+        function closeDialog() {
+            $('#dialog').dialog('close');
+        }
+    </script>
+}
+

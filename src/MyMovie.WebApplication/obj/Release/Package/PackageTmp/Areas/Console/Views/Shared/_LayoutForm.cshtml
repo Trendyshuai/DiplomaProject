@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/easyui-1.5.1/easyui.css" rel="stylesheet" />
+    <link href="~/Content/easyui-1.5.1/icon.css" rel="stylesheet" />
+    <link href="~/Content/console/index.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        @RenderBody()
+    </div>
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.easyui.min.js"></script>
+    <script src="~/Scripts/easyui-lang-zh_CN.js"></script>
+    @RenderSection("Scripts", false)
+</body>
+</html>

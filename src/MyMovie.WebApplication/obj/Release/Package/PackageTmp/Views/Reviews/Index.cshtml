@@ -1,0 +1,51 @@
+﻿@using MyMovie.Core.Entities;
+@{
+    MovieEntity movie = ViewBag.Movie;
+    List<ArticleEntity> list = ViewBag.Reviews;
+}
+
+@{
+    ViewBag.Title = movie.Name + " - 影评";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!--影评-->
+<div class="col-sm-10" style="margin-top:10px">
+    <h4 class="text-success">@movie.Name 的影评</h4>
+    <hr />
+
+    @{
+
+        if (list.Count > 0)
+        {
+            foreach (ArticleEntity r in list)
+            {
+                <div>
+                    <p><span class="tag">@r.NickName</span>  · @r.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                    <p><a href="detail/@r.Id" class="tag">@r.Title</a></p>
+                    <div>
+                        @{
+                            if (r.Text.Length > 200)
+                            {
+                                @r.Text.Substring(0, 200)
+                            }
+                            else
+                            {
+                                @Html.Raw(r.Content)
+                            }
+                        }
+                    </div>
+                    <hr />
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <p class="text-center">暂无影评！</p>
+            </div>
+        }
+    }
+</div>
+

@@ -1,0 +1,137 @@
+﻿@using MyMovie.Core.Entities;
+@{
+    List<CommentEntity> comments = ViewBag.Comments;
+}
+@{
+    ViewBag.Title = "短评";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-sm-10">
+    <h2>我的短评</h2>
+    <hr />
+    <div>
+        @{
+            if (comments.Count > 0)
+            {
+                foreach (CommentEntity c in comments)
+                {
+                    <p>
+                        <a href="/movie/@c.Movie.Id">@c.Movie.Name</a><br />
+                        @c.Conetnt · @c.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")
+                        <br />
+                        <a href="javascript:void(0)" onclick="deleteComment('@c.Id')">删除</a> · <a href="javascript:void(0)" onclick="updateComment('@c.Id')">编辑</a>
+                    </p>
+                    <hr />
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <p class="text-center"> 你暂无评论</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!--更新短评-->
+<div class="modal fade" tabindex="-1" role="dialog" id="smallCommentDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑短评</h4>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" rows="6" id="smallCommentContent" style="resize:none"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveSmallComment()">保存</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 删除确认提示 -->
+<div class="modal fade" tabindex="-1" role="dialog" id="confirmDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">系统提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>你确认删除这条短评吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" onclick="doDelete()">删除</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section Scripts{
+    <script type="text/javascript">
+
+        var id = 0;
+
+        function deleteComment(cId) {
+            $('#confirmDialog').modal('show');
+            id = cId;
+        }
+
+
+        // 删除
+        function doDelete() {
+            $.post({
+                url: 'comment/delete',
+                type: 'post',
+                data: { 'id': id },
+                success: function (data) {
+                    if (data.StatusCode === 200) {
+                        location.reload();
+                    } else {
+                        alert(data.Message);
+                    }
+                }
+            });
+        }
+
+
+        function updateComment(cId) {
+            id = cId;
+            $.post({
+                url: 'comment/get',
+                data: { 'id': id },
+                success: function (data) {
+                    if (data.StatusCode === 200) {
+                        $('#smallCommentContent').val(data.Data.Conetnt);
+                        $('#smallCommentDialog').modal('show');
+                    } else {
+                        alert(data.Message);
+                    }
+                }
+            });
+        }
+
+
+        // 保存数据
+        function saveSmallComment() {
+            var content = $('#smallCommentContent').val();
+            if (content !== '') {
+                $.post({
+                    url: '/comment/update',
+                    data: { 'id': id, 'content': content },
+                    success: function (data) {
+                        if (data.StatusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert(data.Message);
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}

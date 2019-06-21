@@ -1,0 +1,61 @@
+﻿
+@{
+    ViewBag.Title = "注册";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-sm-4 col-sm-offset-4" style="margin-top:60px">
+    <h1 class="text-center" style="padding-bottom:40px">加入我们，遇见更多</h1>
+    <div>
+        <div class="form-group">
+            <label for="userName">用户名</label>
+            <input type="text" class="form-control" id="userName" placeholder="用户名">
+        </div>
+        <div class="form-group">
+            <label for="nickName">昵称</label>
+            <input type="text" class="form-control" id="nickName" placeholder="昵称">
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" class="form-control" id="password" placeholder="密码">
+        </div>
+        <div class="form-group">
+            <label for="rePassword">确认密码</label>
+            <input type="password" class="form-control" id="rePassword" placeholder="确认密码">
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox"  id="checkBox"><a href="/About">《隐私保护协议》</a>,<a href="/About">《用户注册协议》</a>
+            </label>
+        </div>
+        <button type="button" class="btn btn-primary btn-block" id="signup">注册账号</button>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            $('#signup').click(function () {
+                var userName = $('#userName').val().trim();
+                var password = $('#password').val().trim();
+                var nickName = $('#nickName').val().trim();
+
+                if (userName !== '' && password !== '' && nickName!=='') {
+                    $.post({
+                        url: '/user/signup/post',
+                        data: { 'userName': userName, 'password': password, 'nickName': nickName },
+                        success: function (data) {
+                            if (data.StatusCode === 200) {
+                                location.href = "/user/login";
+                            } else {
+                                alert(data.Message);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+

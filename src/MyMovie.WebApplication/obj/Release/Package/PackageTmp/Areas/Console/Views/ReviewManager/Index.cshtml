@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Console/Views/Shared/_LayoutConsole.cshtml";
+}
+
+<div id="dataTable" style="height:100%"></div>
+<!--工具栏-->
+<div id="toolBar" class="toolbar">
+    <input class="easyui-textbox" id="keyWord">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doSearch()">查询</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="resetSearch()">重置查询</a>
+</div>
+
+
+<div id="buttons" style="display:none">
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">保存</a>
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">取消</a>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            initPage();
+            initTable('');
+        });
+
+
+        function initPage() {
+            $('#dialog').dialog('close');
+        }
+
+
+        /*
+         * 初始化数据
+         */
+        function initTable(key) {
+            $('#dataTable').datagrid({
+                url: '/ReviewManager/GetPageList',
+                method: 'get',
+                title: '影评信息',
+                columns: [[
+                    { field: 'MovieName', title: '电影名称', width: 50 },
+                    { field: 'NickName', title: '评论人', width: 50, align: 'left' },
+                    { field: 'Title', title: '评论人', width: 50, align: 'left' },
+                    { field: 'Text', title: '评论内容', width: 100, align: 'left' },
+                    { field: 'ConvertDate', title: '评论时间', width: 50, align: 'left' }
+                ]],
+                pageNumber: 1,
+                pageSize: 20,
+                pageList: [20, 50, 100],
+                toolbar: '#toolBar',
+                striped: true,
+                fitColumns: true,
+                pagination: true,
+                pagePosition: 'bottom',
+                showHeader: true,
+                singleSelect: true,
+                queryParams: {
+                    'key': key
+                }
+            });
+        }
+
+
+        // 查询
+        function doSearch() {
+            var key = $('#keyWord').textbox('getValue');
+            initTable(key);
+        }
+
+        //重置查询
+        function resetSearch() {
+            initTable('');
+            $('#keyWord').textbox('setValue', '');
+        }
+    </script>
+}
+
+
+
+
+

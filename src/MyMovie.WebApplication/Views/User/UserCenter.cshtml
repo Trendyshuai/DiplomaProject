@@ -1,0 +1,72 @@
+﻿@using MyMovie.Core.Entities;
+@{
+    UserEntity user = ViewBag.User;
+    List<CommentEntity> comments = ViewBag.Comments;
+    List<ArticleEntity> reviews = ViewBag.Reviews;
+}
+@{
+    ViewBag.Title = user.NickName + " -  生涯";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-sm-12">
+    <h3>@user.NickName 的生涯</h3>
+    <hr />
+</div>
+<div class="col-sm-10">
+    <h3>他的评论</h3>
+    <hr />
+    @{
+        if (comments.Count > 0)
+        {
+            foreach (CommentEntity c in comments)
+            {
+        <p>
+            <a href="/movie/@c.Movie.Id">@c.Movie.Name</a><br />
+            @c.Conetnt · @c.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")
+            <br />
+
+            <!-- <a href="javascript:void(0)" onclick="deleteComment('@c.Id')">删除</a> · <a href="javascript:void(0)" onclick="updateComment('@c.Id')">编辑</a> -->
+
+        </p>
+                <hr />
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <p class="text-center"> 他暂无评论</p>
+            </div>
+        }
+    }
+</div>
+<div class="col-sm-10">
+    <h2>他的影评</h2>
+    <hr />
+    <div>
+        @{
+            if (reviews.Count > 0)
+            {
+                foreach (ArticleEntity c in reviews)
+                {
+                    <h4>
+                        <a href="/movie/@c.Movie.Id" class="tag">@c.Movie.Name</a><br />
+                    </h4>
+                    <p>
+                        <a href="/reviews/detail/@c.Id" class="tag">@c.Title</a><br />
+                        @(c.Text.Length > 200 ? c.Text.Substring(0, 200) : c.Text) · @c.CreateDate.ToString("yyyy-MM-dd HH:mm:ss") &nbsp;&nbsp;
+                        <br />
+                        <a href="/reviews/detail/@c.Id" class="tag">查看详情</a>
+                    </p>
+                    <hr />
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <p class="text-center">他暂无影评</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+

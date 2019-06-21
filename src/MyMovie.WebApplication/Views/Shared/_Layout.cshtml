@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-3.3.7-dist/css/todc-bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/framework.css" rel="stylesheet" />
+    @RenderSection("Styles", false)
+    @using MyMovie.Core.Entities;
+    @{
+        UserEntity user = Session["User"] as UserEntity;
+    }
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-toolbar">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">时光机</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="/" class="active">首页</a></li>
+                    <li><a href="/movie/top">排行榜</a></li>
+                    <li><a href="/movie/type">分类</a></li>
+                    <li><a href="/about">关于</a></li>
+                </ul>
+
+                <div class="navbar-form navbar-left">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="电影 / 导演 / 演员" id="keyWord">
+                    </div>
+                    <button type="button" class="btn btn-primary" id="searchBtn">搜一搜</button>
+                </div>
+
+                <ul class="nav navbar-nav navbar-right">
+                    @{
+                        if (user != null)
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">@user.NickName <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/comment">我的短评</a></li>
+                                    <li><a href="/reviews">我的影评</a></li>
+                                    <li><a href="/user/info">个人中心</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="/user/logout">退出</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li><a href="/user/signup">注册</a></li>
+                            <li><a href="/user/login">登录</a></li>
+                        }
+                    }
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="container" style="min-height:600px">
+        @RenderBody()
+    </div>
+
+    <div class="container">
+        <hr />
+        <footer>
+            <center><p>&copy; @DateTime.Now.Year - Shine.Lee · 电影网 <a href="~/Console/MovieManager">站长统计</a></p></center>
+        </footer>
+    </div>
+
+    <script src="~/Scripts/jquery-3.3.1/jquery-3.3.1.min.js"></script>
+    <script src="~/Content/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    @RenderSection("Scripts", required: false)
+
+    <script type="text/javascript">
+
+        $('#searchBtn').click(function () {
+            var keyword = $('#keyWord').val().trim();
+            if (keyword !== '') {
+                location.href = '../movie/search?keyword=' + keyword;
+            }
+        });
+
+        $('#keyWord').keyup(function (event) {
+            if (event.keyCode == 13) {
+                $('#searchBtn').click();
+            }
+        })
+
+    </script>
+</body>
+</html>

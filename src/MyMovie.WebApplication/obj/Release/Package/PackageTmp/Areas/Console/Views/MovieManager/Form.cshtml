@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewBag.Title = "Form";
+    Layout = "~/Areas/Console/Views/Shared/_LayoutForm.cshtml";
+}
+@using MyMovie.Core.Entities;
+@{
+    MovieEntity movie = ViewBag.Movie;
+}
+
+<form method="post" id="form" enctype="multipart/form-data">
+    <table class="table">
+        <tr>
+            <td>
+                <input type="hidden" name="Id" value="@(movie==null?0:movie.Id)" />
+                <input class="easyui-textbox" type="text" name="Name" id="Name" label="电影名称" labelPosition="top" />
+            </td>
+            <td>
+                <input class="easyui-textbox" type="text" name="Director" id="Director" label="演员" labelPosition="top" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input class="easyui-textbox" type="text" name="Language" id="Language" label="语言" labelPosition="top" />
+            </td>
+            <td>
+                <input class="easyui-textbox" type="text" name="ReleaseDate" id="ReleaseDate" label="上映时间" labelPosition="top" />
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <input class="easyui-textbox" type="text" name="Duration" id="Duration" label="时长" labelPosition="top" />
+            </td>
+            <td>
+                <input class="easyui-textbox" type="text" name="Alias" id="Alias" label="别名" labelPosition="top" />
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <input class="easyui-textbox" type="text" name="Rate" id="Rate" label="评分" labelPosition="top" />
+            </td>
+            <td>
+                <select class="easyui-combobox" name="DelFlag" label="是否上架" labelPosition="top" style="width:200px" id="DelFlag" aut>
+                    <option value="1">上架</option>
+                    <option value="2">下架</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <input class="easyui-filebox" name="PosterURL" id="PosterURL" label="海报" labelPosition="top">
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <input class="easyui-textbox" type="text" multiline="true" name="Description" id="Description" label="简介" labelPosition="top" style="width:480px;height:160px" />
+            </td>
+        </tr>
+    </table>
+</form>
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+
+            // 表单 赋值
+            setFormData();
+        });
+
+        function setFormData() {
+            $('#Name').textbox('setValue', '@(movie==null?"":movie.Name)');
+            $('#Director').textbox('setValue', '@(movie==null?"":movie.Director)');
+            $('#Language').textbox('setValue', '@(movie==null?"":movie.Language)');
+            $('#ReleaseDate').textbox('setValue', '@(movie==null?"":movie.ReleaseDate)');
+            $('#Alias').textbox('setValue', '@(movie==null?"":movie.Alias)');
+            $('#Duration').textbox('setValue', '@(movie==null?"":movie.Duration)');
+            $('#Rate').textbox('setValue', '@(movie==null?"":movie.Rate.ToString())');
+          //  $('#PosterURL').textbox('setValue', '@(movie==null?"":movie.PosterURL)');
+            $('#Description').textbox('setValue', "@(movie==null?"":movie.Description.Replace(Environment.NewLine,""))");
+            $('#DelFlag').combobox('select', '@(movie==null?"":movie.DelFlag.ToString())');
+        }
+
+
+        // 保存数据
+        function save() {
+            $('#form').form({
+                url: '@(movie==null? "AddMovie" : "UpdateMovie")',
+                success: function (data) {
+                    var jData = JSON.parse(data);
+                    if (jData.StatusCode === 200) {
+                        parent.window.reloadData();
+                        parent.window.closeDialog();
+                    } else {
+                        $.messager.alert('系统提示', jData.Message, 'error');
+                    }
+                }
+            }).submit();
+        }
+    </script>
+}
+

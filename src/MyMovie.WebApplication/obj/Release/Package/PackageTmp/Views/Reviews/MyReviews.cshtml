@@ -1,0 +1,169 @@
+﻿
+@{
+    ViewBag.Title = "影评";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using MyMovie.Core.Entities;
+@{
+    List<ArticleEntity> reviews = ViewBag.Reviews;
+}
+<div class="col-sm-10">
+    <h2>我的影评</h2>
+    <hr />
+    <div>
+        @{
+            if (reviews.Count > 0)
+            {
+                foreach (ArticleEntity c in reviews)
+                {
+                    <h4>
+                        <a href="/movie/@c.Movie.Id" class="tag">@c.Movie.Name</a><br />
+                    </h4>
+                    <p>
+                        <a href="/reviews/detail/@c.Id" class="tag">@c.Title</a><br />
+                        @(c.Text.Length > 200 ? c.Text.Substring(0, 200) : c.Text) · @c.CreateDate.ToString("yyyy-MM-dd HH:mm:ss") &nbsp;&nbsp;
+                        <br />
+                        <a href="/reviews/detail/@c.Id" class="tag">查看详情</a>  · <a href="javascript:void(0)" class="tag" onclick="deleteComment('@c.Id')">删除</a> · <a href="javascript:void(0)" class="tag" onclick="updateComment('@c.Id')">编辑</a>
+                    </p>
+                    <hr />
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <p class="text-center"> 你暂无影评</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+<!--更新短评-->
+<div class="modal fade" tabindex="-1" role="dialog" id="smallCommentDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑影评</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" class="form-control" id="title" />
+                </div>
+                <div>
+                    <label>内容</label>
+                    <textarea class="form-control" rows="20" id="fileReviewContent"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveSmallComment()">保存</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 删除确认提示 -->
+<div class="modal fade" tabindex="-1" role="dialog" id="confirmDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">系统提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>你确认删除这条影评吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" onclick="doDelete()">删除</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section Scripts{
+
+    <script src="~/Content/ckeditor/ckeditor.js"></script>
+    <script src="~/Content/ckeditor/config.js"></script>
+    <script src="~/Content/ckeditor/styles.js"></script>
+    <script src="~/Content/ckeditor/zh-cn.js"></script>
+
+    <script type="text/javascript">
+
+        // 加载ckeditor
+        var editor = CKEDITOR.replace('fileReviewContent');
+
+        var id = 0;
+        function deleteComment(cId) {
+            $('#confirmDialog').modal('show');
+            id = cId;
+        }
+
+
+        // 删除
+        function doDelete() {
+            $.post({
+                url: 'reviews/delete',
+                type: 'post',
+                data: { 'id': id },
+                success: function (data) {
+                    if (data.StatusCode === 200) {
+                        location.reload();
+                    } else {
+                        alert(data.Message);
+                    }
+                }
+            });
+        }
+
+
+        function updateComment(cId) {
+            id = cId;
+            $.post({
+                url: 'reviews/get',
+                data: { 'id': id },
+                success: function (data) {
+                    if (data.StatusCode === 200) {
+                        $('#title').val(data.Data.Title);
+                        editor.setData(data.Data.Content);
+                        $('#smallCommentDialog').modal('show');
+                    } else {
+                        alert(data.Message);
+                    }
+                }
+            });
+        }
+
+
+        // 保存数据
+        function saveSmallComment() {
+
+           
+
+            var content = editor.getData();
+            var title = $('#title').val(); 
+            var text = editor.document.getBody().getText(); // 获取纯文本
+
+
+            console.log(id)
+            console.log(content)
+            console.log(title)
+            console.log(text)
+
+            if (content !== '' && title!=='') {
+                $.post({
+                    url: '/reviews/update',
+                    data: { 'id': id, 'content': content, 'title': title,'text':text },
+                    success: function (data) {
+                        if (data.StatusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert(data.Message);
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+

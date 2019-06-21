@@ -1,0 +1,65 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>登录</title>
+    <link href="~/Content/easyui-1.5.1/easyui.css" rel="stylesheet" />
+    <link href="~/Content/easyui-1.5.1/icon.css" rel="stylesheet" />
+</head>
+<body>
+
+
+    <div id="win" class="easyui-window" title="登录到后台管理系统" style="width:600px;height:400px"
+         data-options="iconCls:'icon-save',modal:true,'collapsible':false,'minimizable':false,'maximizable':false,'closable':false">
+
+
+        <div style="margin-top:100px;margin-left:200px">
+            <h2>登录到后台管理系统</h2>
+            <input class="easyui-textbox" data-options="iconCls:'icon-man'" style="width:200px;margin-left:200px" id="userName">
+
+        </div>
+
+        <div style="margin-top:20px;margin-left:200px">
+            <input class="easyui-passwordbox" data-options="iconCls:'icon-lock'" style="width:200px;margin-left:200px" id="password">
+        </div>
+
+        <div style="margin-top:20px;text-align:center;">
+            <a id="btn" href="javascript:void(0)" class="easyui-linkbutton" onclick="login()">登录</a>
+            <a href="/" class="easyui-linkbutton">退出</a>
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.easyui.min.js"></script>
+    <script src="~/Scripts/easyui-lang-zh_CN.js"></script>
+
+    <script>
+        function login() {
+            var userName = $('#userName').textbox('getValue');
+            var password = $('#password').textbox('getValue');
+
+            if (userName !== '' && password !== '') {
+                $.ajax({
+                    url: 'OverView/Login',
+                    type: 'post',
+                    data: { 'userName': userName, 'password': password },
+                    success: function (data) {
+                        if (data.StatusCode === 200) {
+                            location.href = "/Console/MovieManager";
+                        } else {
+                            $.messager.alert('系统提示', data.Message, 'info');
+                        }
+                    }
+                });
+            }
+
+        }
+    </script>
+</body>
+</html>

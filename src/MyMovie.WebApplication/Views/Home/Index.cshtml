@@ -1,0 +1,68 @@
+﻿
+@{
+    ViewBag.Title = "电影网";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using MyMovie.Core.Entities;
+
+<div class="col-sm-12">
+    <div class="jumbotron">
+        <h1>发现好电影</h1>
+        <p>...</p>
+        <p><a class="btn btn-primary btn-lg" href="/movie/type" role="button">发现更多</a></p>
+    </div>
+</div>
+<div class="col-sm-12">
+    <h4 class="text-center">最近热门</h4>
+    <hr />
+    <div class="row">
+        <div class="col-sm-3 pull-left">
+            <div class="thumbnail" style="min-height:300px">
+                <img src="./Posters/p2529206747.jpg" class="img-responsive" />
+            </div>
+        </div>
+        <div class="col-sm-3 pull-left">
+            <div class="thumbnail" style="min-height:300px">
+                <img src="./Posters/p2519070834.jpg" class="img-responsive" />
+            </div>
+        </div>
+        <div class="col-sm-3 pull-left">
+            <div class="thumbnail" style="min-height:300px">
+                <img src="./Posters/p2526297221.jpg" class="img-responsive" />
+            </div>
+        </div>
+        <div class="col-sm-3 pull-left">
+            <div class="thumbnail" style="min-height:300px">
+                <img src="./Posters/p2539661066.jpg" class="img-responsive" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-12">
+    <br />
+    <h4 class="text-center">电影信息</h4>
+    <hr />
+    <!--遍历电影-->
+    <div class="row">
+        @{
+            foreach (MovieEntity movie in ViewBag.Movies)
+            {
+                <div class="col-sm-3 pull-left">
+                    <div class="thumbnail" style="min-height:480px">
+                        <a href="/movie/@movie.Id"><img src="./Images/@movie.PosterURL" class="img-responsive" /></a>
+                        <div class="caption">
+                            <p><strong>@(movie.Name.Length > 12 ? movie.Name.Substring(0, 12) : movie.Name) </strong> <span class="text-danger">@movie.Rate</span></p>
+                            <p>
+                                <a href="/movie/@movie.Id" class="btn btn-primary btn-sm" role="button">查看详情</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+

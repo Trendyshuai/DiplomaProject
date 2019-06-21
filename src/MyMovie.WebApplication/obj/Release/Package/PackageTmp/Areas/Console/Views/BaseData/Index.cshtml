@@ -1,0 +1,265 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Console/Views/Shared/_LayoutConsole.cshtml";
+}
+
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'west',title:'字典管理'" style="width:16%">
+
+        <div class="toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="openAddBaseDataDialog()">添加</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateBaseDataDialog()">修改</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="deleteBaseDic()">删除</a>
+        </div>
+        <!--Key-->
+        <div>
+            <ul id="tree" class="easyui-tree" data-options="url:'BaseData/GetParentList'"></ul>
+        </div>
+    </div>
+    <!--values-->
+    <div data-options="region:'center'">
+        <div id="dataTable" style="height:100%"></div>
+        <!--工具栏-->
+        <div id="toolBar" class="toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="openAddDicDataDialog()">添加</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateDicDataDialog()">修改</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="deleteDic()">删除</a>
+        </div>
+    </div>
+</div>
+
+
+<!--dialog button-->
+<div id="buttons" style="display:none">
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true" onclick="saveData()">保存</a>
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true" onclick="closeDialog()">取消</a>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+            // Tree选中时加载数据
+            $('#tree').tree({
+                'onSelect': function (node) {
+                    initDataTable(node.id, false);
+                }
+            });
+
+        });
+
+
+        /*
+         * 初始化Table
+         * @@param parId 父级Id
+         * @@param init 是否第一次加载
+         */
+        function initDataTable(parId) {
+            $('#dataTable').datagrid({
+                url: 'BaseData/GetPageList',
+                method: 'get',
+                title: '字典数据管理',
+                columns: [[
+                    { field: 'Id', title: '编号', width: 50 },
+                    { field: 'Name', title: '字典数据项', width: 100 }
+                ]],
+                pageNumber: 1,
+                pageSize: 20,
+                pageList: [20, 50, 100],
+                toolbar: '#toolBar',
+                striped: true,
+                fitColumns: true,
+                pagination: true,
+                pagePosition: 'bottom',
+                showHeader: true,
+                singleSelect: true,
+                queryParams: {
+                    'parId': parId
+                }
+            });
+        }
+
+
+        //var convertTreeData = function (rows) {
+        //    var nodes = [];
+        //    for (var i = 0; i < rows.length; i++) {
+        //        var row = rows[i];
+        //        nodes.push({
+        //            "id": row.id,
+        //            "text": row.text,
+        //            "state": row.state,
+        //            "children": row.children
+        //        });
+        //    }
+        //    return nodes;
+        //};
+        //   $.fn.tree.defaults.loadFilter = convertTreeData;
+
+
+        /*
+         * add BaseData
+         */
+        function openAddBaseDataDialog() {
+            $('#dialog').dialog({
+                title: '添加字典分类',
+                open: true,
+                modal: true,
+                width: 400,
+                height: 200,
+                top: 200,
+                border: 'thick',
+                buttons: '#buttons'
+            });
+            $('#dialog-from').attr('src', 'BaseData/Form?action=add&parId=0');
+        }
+
+        /*
+         * update BaseData
+         */
+        function openUpdateBaseDataDialog() {
+            var data = $('#tree').tree('getSelected');
+            if (data) {
+                $('#dialog').dialog({
+                    title: '修改字典分类',
+                    open: true,
+                    modal: true,
+                    width: 400,
+                    height: 200,
+                    top: 200,
+                    border: 'thick',
+                    buttons: '#buttons'
+                });
+                $('#dialog-from').attr('src', 'BaseData/Form?action=update&id=' + data.id + '&parId=0');
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        /*
+         * 删除字典分类
+         */
+        function deleteBaseDic() {
+            var data = $('#tree').tree('getSelected');
+            if (data) {
+                $.messager.confirm('确认', '您确认想要删除记录吗？', function (r) {
+                    if (r) {
+                        $.ajax({
+                            url: 'BaseData/Delete',
+                            type: 'post',
+                            data: { 'id': data.id },
+                            success: function (data) {
+                                if (data.StatusCode === 200) {
+                                    reloadData();
+                                } else {
+                                    $.messager.alert('系统提示', data.Message, 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        /*
+         * 添加二级数据管理
+         */
+        function openAddDicDataDialog() {
+            var data = $('#tree').tree('getSelected');
+            if (data) {
+                $('#dialog').dialog({
+                    title: '添加字典数据',
+                    open: true,
+                    modal: true,
+                    width: 400,
+                    height: 200,
+                    top: 200,
+                    border: 'thick',
+                    buttons: '#buttons'
+                });
+                $('#dialog-from').attr('src', 'BaseData/Form?action=add&parId=' + data.id);
+            } else {
+                $.messager.alert('系统提示', '请选择字典分类', 'info');
+            }
+        }
+
+
+        /*
+        * 修改二级数据管理
+        */
+        function openUpdateDicDataDialog() {
+            var data = $('#dataTable').datagrid('getSelected');
+            if (data) {
+                $('#dialog').dialog({
+                    title: '修改字典数据',
+                    open: true,
+                    modal: true,
+                    width: 400,
+                    height: 200,
+                    top: 200,
+                    border: 'thick',
+                    buttons: '#buttons'
+                });
+                $('#dialog-from').attr('src', 'BaseData/Form?action=update&id=' + data.Id);
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        function deleteDic() {
+            var data = $('#dataTable').datagrid('getSelected');
+            if (data) {
+                $.messager.confirm('确认', '您确认想要删除记录吗？', function (r) {
+                    if (r) {
+                        $.ajax({
+                            url: 'BaseData/Delete',
+                            type: 'post',
+                            data: { 'id': data.Id },
+                            success: function (data) {
+                                if (data.StatusCode === 200) {
+                                    reloadData();
+                                } else {
+                                    $.messager.alert('系统提示', data.Message, 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                $.messager.alert('系统提示', '请选择要操作的数据', 'info');
+            }
+        }
+
+
+        /*
+         * 调用子窗体的saveData() 方法
+         */
+        function saveData() {
+            // 获取子窗体
+            var childWindow = $("#dialog-from")[0].contentWindow;
+            childWindow.saveData();
+        }
+
+        /*
+         * 刷新数据供子窗体调用
+         */
+        function reloadData() {
+            $('#tree').tree('reload');
+            $('#dataTable').datagrid('reload');
+
+        }
+
+        /*
+         * 关闭Dialog
+         */
+        function closeDialog() {
+            $('#dialog').dialog('close');
+        }
+    </script>
+}
+
+
